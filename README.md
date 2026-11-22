@@ -1,5 +1,7 @@
 # Take Home Assessment
 
+Visit https://watchlistapp-woad.vercel.app/ to view the app.
+
 ## Setup
 
 Clone the repo:
