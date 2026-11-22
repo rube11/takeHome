@@ -1,0 +1,247 @@
+/* The home page around the derby: its header and the list of stocks (Watchlist.tsx). */
+
+.watchlist-header {
+  padding: 4px 0 28px;
+}
+
+/* ---- The list ---- */
+
+.list {
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 0;
+  list-style: none;
+}
+
+/* Each day's move posts like a race result: the colour lands first on the smallest moves
+   and last on the biggest. The square root keeps a quiet day's small moves spread out, and
+   moves past 16% all post at the end. */
+@keyframes posted {
+  from {
+    color: var(--text-2);
+  }
+}
+
+.row-move,
+.row-change {
+  animation: posted 0.3s calc(sqrt(min(var(--move), 0.16)) * 1.5s) ease-out both;
+}
+
+.item {
+  position: relative;
+}
+
+/* A divider between rows, starting after the logo column. */
+.item + .item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: calc(var(--gutter) + 48px);
+  height: 1px;
+  background: var(--line);
+}
+
+/* ---- A row (WatchlistRow in Watchlist.tsx). On phones the price sits over the % change. ---- */
+
+.row,
+.columns {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto 14px;
+  grid-template-areas:
+    'logo name price chevron'
+    'logo name change chevron';
+  column-gap: 12px;
+  align-items: center;
+}
+
+.row {
+  width: 100%;
+  min-height: 68px;
+  padding: 12px var(--gutter);
+  border: 0;
+  background: none;
+  text-align: left;
+  color: inherit;
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+
+.row:hover {
+  background: var(--surface);
+}
+
+.row:focus-visible {
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
+.row-name {
+  grid-area: name;
+  min-width: 0;
+}
+
+.row-symbol {
+  display: block;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.row-company,
+.row-stale {
+  display: block;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.3;
+}
+
+.row-stale {
+  margin-top: 2px;
+  font-size: 13px;
+}
+
+.row-price,
+.row-move,
+.row-change {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.row-price {
+  grid-area: price;
+  align-self: end;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* The dollar move only fits the wide layout. */
+.row-move {
+  display: none;
+}
+
+.row-change {
+  grid-area: change;
+  align-self: start;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.row-chevron {
+  grid-area: chevron;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: var(--text-3);
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    transform 0.2s,
+    stroke 0.2s;
+}
+
+/* While the tapped row's stock page loads (RowChevron.tsx). */
+.row-chevron.pending {
+  stroke: var(--text);
+  transform: translateX(3px);
+  animation: loading-pulse 0.9s ease-in-out infinite;
+}
+
+.columns {
+  display: none;
+}
+
+@media (max-width: 380px) {
+  .row {
+    column-gap: 10px;
+  }
+}
+
+/* ---- Wide layout: one line per stock, in a card, under column headings ---- */
+
+@media (min-width: 720px) {
+  .watchlist-header {
+    padding-bottom: 36px;
+  }
+
+  .list {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 14px;
+    background: var(--surface);
+  }
+
+  .row:hover {
+    background: var(--surface-raised);
+  }
+
+  .row:focus-visible {
+    border-radius: 14px;
+  }
+
+  .row,
+  .columns {
+    grid-template-columns: 36px minmax(0, 1fr) 7.5rem 7rem 5.5rem 14px;
+    grid-template-areas: 'logo name price move change chevron';
+    column-gap: 16px;
+  }
+
+  .item + .item::before {
+    left: calc(var(--gutter) + 52px);
+  }
+
+  .row-name {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    column-gap: 10px;
+  }
+
+  .row-symbol {
+    min-width: 3.5em;
+  }
+
+  .row-company {
+    font-size: 15px;
+  }
+
+  .row-stale {
+    flex-basis: 100%;
+  }
+
+  .row-price,
+  .row-move,
+  .row-change {
+    align-self: center;
+    font-size: 16px;
+  }
+
+  .row-move {
+    display: block;
+    grid-area: move;
+    font-weight: 500;
+  }
+
+  .columns {
+    display: grid;
+    padding: 0 var(--gutter) 8px;
+    color: var(--text-2);
+    font-size: 13px;
+  }
+
+  .columns span:first-child {
+    grid-column: logo / name;
+  }
+
+  .columns span:not(:first-child) {
+    text-align: right;
+  }
+}
+
+/* Touch screens don't hover; skip the hover highlight so it doesn't stick after a tap. */
+@media (hover: none) {
+  .row:hover {
+    background: none;
+  }
+}

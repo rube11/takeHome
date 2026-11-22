@@ -1,0 +1,427 @@
+/*
+ * The derby (Derby.tsx): one lane per stock, re-sorted after every session.
+ * The lanes line up with the list below: each track starts at the list's logo column, and each
+ * lane's % sits in the list's % Change column.
+ *
+ * The components set these custom properties:
+ *   --session-ms  milliseconds per session, so movements last exactly one session
+ *   --runners     how many lanes there are
+ *   --place       a lane's place (0 is first), which sets how far down it sits
+ *   --x           where the lane's logo is, as a % of the track's width
+ */
+.derby {
+  --lane: 26px; /* lane height */
+  --tile: 20px; /* logo tile size */
+  --ring: 1px; /* logo outline */
+  --pad: 14px; /* space before the track */
+  --val: 46px; /* width of the % column */
+  --tail: 26px; /* space after the % column, where the list's chevron sits */
+  margin: 0;
+}
+
+.derby-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.derby-heading {
+  display: flex;
+  flex-direction: column;
+  margin-right: auto;
+}
+
+.derby-title {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.derby-day {
+  /* Holds its line while empty, so the title doesn't jump when the count appears. */
+  min-height: 1lh;
+  color: var(--text-2);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.derby-replay {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--control);
+  color: var(--text-2);
+}
+
+.derby-replay:hover {
+  color: var(--text);
+}
+
+.derby-replay svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* How far through the race we are. */
+.derby-clock {
+  display: block;
+  height: 1px;
+  margin: 12px 0 14px;
+  background: var(--line);
+}
+
+.derby-clock i {
+  display: block;
+  height: 100%;
+  background: color-mix(in srgb, var(--gold) 45%, transparent);
+  transition: width var(--session-ms) linear;
+}
+
+/* Once the race is run, the bar fades back into a plain rule. */
+.finished .derby-clock i {
+  opacity: 0;
+  transition: opacity 1.2s 0.6s;
+}
+
+.derby-field {
+  position: relative;
+  height: calc(var(--runners) * var(--lane));
+}
+
+.derby-gridlines {
+  position: absolute;
+  top: -6px;
+  right: calc(var(--pad) + var(--val) + var(--tail));
+  bottom: -6px;
+  left: var(--pad);
+}
+
+.derby-gridline,
+.derby-gate {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--line);
+}
+
+/* The start line, at 0%. */
+.derby-gate {
+  width: 2px;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: var(--text-3);
+}
+
+.derby-lane {
+  position: absolute;
+  top: calc(var(--place) * var(--lane));
+  right: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  height: var(--lane);
+  border-radius: 8px;
+  color: inherit;
+  text-decoration: none;
+  transition: top 0.6s cubic-bezier(0.3, 0.7, 0.2, 1);
+}
+
+.running .derby-lane {
+  transition-duration: 0.5s;
+}
+
+/* A clicked lane glows while its stock page loads. */
+.derby-loading {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.derby-loading.pending {
+  opacity: 1;
+  animation: loading-pulse 0.9s ease-in-out infinite;
+}
+
+.derby-lane:hover {
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+}
+
+.leading .derby-track::before {
+  content: '';
+  position: absolute;
+  inset: 2px 0;
+  border-radius: 10px;
+  background: radial-gradient(
+    60% 140% at var(--x) 50%,
+    color-mix(in srgb, var(--gold) 16%, transparent),
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+.derby-track {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  margin: 0 var(--pad);
+}
+
+/* biome-ignore lint/style/noDescendingSpecificity: a different <i> from .derby-clock i. */
+.derby-track > i {
+  position: absolute;
+  top: 50%;
+}
+
+/* The range run so far, with a tick at its high. */
+.derby-band {
+  height: 6px;
+  margin-top: -3px;
+  border-radius: 3px;
+  background: rgb(255 255 255 / 0.075);
+  transition:
+    left var(--session-ms) linear,
+    width var(--session-ms) linear;
+}
+
+.derby-high {
+  position: absolute;
+  top: -3px;
+  right: -1px;
+  width: 2px;
+  height: 12px;
+  border-radius: 1px;
+  background: var(--text-3);
+}
+
+/* Today's move: a trail tapering in from yesterday's spot (the hollow dot). */
+.derby-trail,
+.derby-yesterday,
+.derby-arrow {
+  z-index: 1;
+  animation: derby-in 0.4s both;
+}
+
+.derby-trail {
+  height: 6px;
+  margin-top: -3px;
+}
+
+.derby-trail.up {
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--up) 35%, transparent),
+    var(--up)
+  );
+  clip-path: polygon(0 38%, 100% 0, 100% 100%, 0 62%);
+}
+
+.derby-trail.down {
+  background: linear-gradient(
+    270deg,
+    color-mix(in srgb, var(--down) 35%, transparent),
+    var(--down)
+  );
+  clip-path: polygon(0 0, 100% 38%, 100% 62%, 0 100%);
+}
+
+/* Off the scale: dashed, and not to scale. */
+.derby-trail.off-scale {
+  width: 48px;
+  height: 3px;
+  margin-top: -1.5px;
+  clip-path: none;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--trail) 0 6px,
+    transparent 6px 10px
+  );
+}
+
+.derby-trail.off-scale.up {
+  --trail: var(--up);
+}
+
+.derby-trail.off-scale.down {
+  --trail: var(--down);
+}
+
+.derby-yesterday {
+  width: 6px;
+  height: 6px;
+  margin: -3px 0 0 -3px;
+  border: 1.5px solid var(--text-3);
+  border-radius: 50%;
+  background: var(--bg);
+}
+
+/* Direction only, for a move too short to show past the logo. */
+.derby-arrow {
+  width: 0;
+  height: 0;
+  margin-top: -4px;
+  border-block: 4px solid transparent;
+}
+
+.derby-arrow.up {
+  margin-left: calc(var(--tile) / 2 + var(--ring) + 2px);
+  border-left: 6px solid var(--up);
+}
+
+.derby-arrow.down {
+  margin-left: calc(var(--tile) / -2 - var(--ring) - 8px);
+  border-right: 6px solid var(--down);
+}
+
+.derby-logo {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: var(--x);
+  width: var(--tile);
+  height: var(--tile);
+  margin: calc(var(--tile) / -2) 0 0 calc(var(--tile) / -2);
+  border-radius: 6px;
+  box-shadow: 0 0 0 var(--ring) rgb(255 255 255 / 0.1);
+  transition: left var(--session-ms) linear;
+}
+
+/* On arrival each runner waits behind a pair of stall doors, which swing open for the off. */
+.derby-logo::before {
+  --door: linear-gradient(var(--control) 0 0) no-repeat;
+  content: '';
+  position: absolute;
+  z-index: 1; /* above the cut-out logos, whose mask gives them their own layer */
+  inset: -1px;
+  border-radius: inherit;
+  background:
+    var(--door) left / 50% 100%,
+    var(--door) right / 50% 100%;
+  animation: derby-doors 0.3s ease-out forwards;
+}
+
+@keyframes derby-doors {
+  to {
+    background-size: 0 100%;
+  }
+}
+
+.leading .derby-logo {
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 3.5px var(--gold);
+}
+
+.derby-logo .logo {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.derby-logo .logo img,
+.derby-logo .logo-cutout {
+  width: 62%;
+  height: 62%;
+}
+
+/* A break mark on the outer side of a logo pinned to the edge. */
+.derby-logo.pinned-left::after,
+.derby-logo.pinned-right::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 6px;
+  height: 12px;
+  margin-top: -6px;
+  border-inline: 2px solid var(--text-3);
+  transform: skewX(-18deg);
+}
+
+.derby-logo.pinned-left::after {
+  left: -11px;
+}
+
+.derby-logo.pinned-right::after {
+  right: -11px;
+}
+
+.derby-change {
+  width: var(--val);
+  margin-right: var(--tail);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.derby-axis {
+  position: relative;
+  height: 14px;
+  margin: 12px calc(var(--pad) + var(--val) + var(--tail)) 0 var(--pad);
+  color: var(--text-3);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.derby-axis span {
+  position: absolute;
+  transform: translateX(-50%);
+}
+
+.derby .segmented button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@keyframes derby-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (max-width: 380px) {
+  .derby {
+    --tail: 24px;
+  }
+}
+
+@media (min-width: 720px) {
+  .derby {
+    --lane: 32px;
+    --tile: 26px;
+    --pad: var(--gutter);
+    --val: 5.5rem;
+    --tail: calc(var(--gutter) + 30px);
+  }
+
+  .derby-title {
+    font-size: 20px;
+  }
+
+  .derby-change {
+    font-size: 13px;
+  }
+
+  .derby-axis {
+    font-size: 12px;
+  }
+}
+
+@media (hover: none) {
+  .derby-lane:hover {
+    background: none;
+  }
+}

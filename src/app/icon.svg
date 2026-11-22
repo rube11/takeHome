@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <title>Ticker</title>
+  <rect width="40" height="40" rx="9" fill="#141416"/>
+  <path d="M9 26.5 16 19.5l5 4.5 10-11" fill="none" stroke="#f4f4f5" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

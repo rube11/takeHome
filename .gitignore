@@ -1,0 +1,12 @@
+.env
+.env.*
+!.env.example
+.next/
+node_modules/
+*.tsbuildinfo
+data/.cache/
+
+# AI agent files (next dev writes AGENTS.md)
+AGENTS.md
+CLAUDE.md
+.claude/

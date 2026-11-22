@@ -1,0 +1,230 @@
+/* The price readout, the chart and the range buttons (PriceChart.tsx). */
+
+/* ---- Readout: the price and the lines under it ---- */
+
+.readout {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+.readout-price {
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+/* The move line never wraps, so the chart can't jump while being scrubbed. */
+.readout-move {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.readout-move {
+  margin-top: 2px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.readout-note {
+  color: var(--text-2);
+  font-weight: 400;
+}
+
+/* ---- The chart: a plot with the % axis on its right and the dates under it ---- */
+
+.chart {
+  margin-top: 16px;
+}
+
+.chart-frame {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 8px;
+}
+
+.chart-plot {
+  position: relative;
+  /* Room for the logo at the end of the line. */
+  margin-right: 14px;
+  height: 200px;
+  cursor: crosshair;
+  touch-action: pan-y;
+  border-radius: 4px;
+}
+
+.chart-plot svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* Lines keep their width however much the SVG stretches. */
+.chart-plot line,
+.chart-plot polyline {
+  vector-effect: non-scaling-stroke;
+  fill: none;
+}
+
+.chart-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+
+/* 0%, the first close of the range, when there's no comparison. */
+.chart-base {
+  stroke: var(--text-3);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+/* Middle of the pack: the middle half of the other stocks on each session. */
+.chart-pack {
+  fill: rgb(255 255 255 / 0.07);
+}
+
+/* The line takes its colour (green or red) from the plot's tone class. */
+.chart-line {
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.chart-crosshair {
+  stroke: var(--text-2);
+  stroke-width: 1;
+}
+
+.chart-dot {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 3px var(--bg);
+  pointer-events: none;
+}
+
+.chart-axis {
+  position: relative;
+  min-width: 44px;
+}
+
+.chart-axis span,
+.chart-dates {
+  color: var(--text-2);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chart-axis span {
+  position: absolute;
+  right: 0;
+  transform: translateY(-50%);
+  line-height: 1;
+}
+
+.chart-dates {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 14px 0 0;
+}
+
+/* ---- The logo at the end of the line ---- */
+
+.chart-logo {
+  position: absolute;
+  z-index: 1;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  border-radius: 7px;
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 3px rgb(255 255 255 / 0.12);
+  pointer-events: none;
+  /* The gold ring fades in at the finish, without changing the logo's size. */
+  transition: box-shadow 0.1s;
+}
+
+.chart-logo.leading {
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 3.5px var(--gold);
+}
+
+.chart-logo .logo {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.chart-logo .logo img,
+.chart-logo .logo-cutout {
+  width: 62%;
+  height: 62%;
+}
+
+/* ---- The entrance race (useEntranceRace.ts) ---- */
+
+/* Until the race starts, the finished line and logo from the server stay hidden. */
+@media (scripting: enabled) {
+  [data-race='waiting'] :is(.chart-line, .chart-area, .chart-logo) {
+    visibility: hidden;
+  }
+}
+
+/* ---- The key and the range buttons ---- */
+
+.chart-key {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 10px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.chart-key span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.chart-key i {
+  display: block;
+  width: 14px;
+}
+
+.chart-key-line {
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.chart-key-pack {
+  height: 10px;
+  border-radius: 2px;
+  background: rgb(255 255 255 / 0.12);
+}
+
+.price-chart > .segmented {
+  margin-top: 16px;
+}
+
+@media (min-width: 720px) {
+  .readout-price {
+    font-size: 40px;
+  }
+
+  .chart-plot {
+    height: 280px;
+  }
+}

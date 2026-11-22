@@ -1,0 +1,209 @@
+/*
+ * Styles shared by every page: colours, the base reset, type, and a few shared pieces.
+ * Each component's own styles live in a .css file beside it.
+ */
+
+/* ---- Colours and spacing ---- */
+
+:root {
+  --bg: #0b0b0c;
+  --surface: #141416;
+  --surface-raised: #1b1b1e;
+  --control: #232327;
+  --control-on: #3a3a40;
+  --line: #26262b;
+  --text: #f4f4f5;
+  --text-2: #a3a3ab; /* secondary text */
+  --text-3: #6c6c74; /* faint text and marks */
+  --up: #3ccf7f;
+  --down: #f26b5e;
+  --accent: #6aa8ff;
+  --gold: #f5c542; /* the leader's ring */
+  --logo-tile: #1f1f23;
+  --gutter: 16px; /* space at the page's sides */
+  --font:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Text', 'Segoe UI',
+    var(--font-inter), system-ui, sans-serif;
+  color-scheme: dark;
+}
+
+@media (max-width: 380px) {
+  :root {
+    --gutter: 14px;
+  }
+}
+
+@media (min-width: 720px) {
+  :root {
+    --gutter: 24px;
+  }
+}
+
+/* ---- Base ---- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+p,
+ul,
+dl,
+dd {
+  margin: 0;
+}
+
+h1 {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- Page layout: a centred column ---- */
+
+.app {
+  max-width: calc(840px + 2 * var(--gutter));
+  margin: 0 auto;
+  padding: max(20px, env(safe-area-inset-top)) var(--gutter)
+    max(32px, env(safe-area-inset-bottom));
+}
+
+@media (min-width: 720px) {
+  .app {
+    padding-top: 48px;
+  }
+}
+
+/* ---- Shared pieces ---- */
+
+/* Hidden on screen but read by screen readers. */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Colours for a change in price (toneClass in src/market/format.ts). */
+.positive {
+  color: var(--up);
+}
+
+.negative {
+  color: var(--down);
+}
+
+.neutral {
+  color: var(--text-2);
+}
+
+/* A row of toggle buttons, like 1W / 1M / 3M. The pressed one is highlighted. */
+.segmented {
+  display: inline-flex;
+  flex: none;
+  padding: 2px;
+  border-radius: 10px;
+  background: var(--control);
+}
+
+.segmented button {
+  min-width: 48px;
+  height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.segmented button:hover {
+  color: var(--text);
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--control-on);
+  color: var(--text);
+}
+
+/* A gentle pulse for something that's loading: a tapped row's arrow, or a clicked derby lane. */
+@keyframes loading-pulse {
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* ---- A company logo on its tile (components/Logo.tsx); sizes are overridden where it appears ---- */
+
+.logo {
+  grid-area: logo;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  background: var(--logo-tile);
+}
+
+.logo img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+/* A square icon fills its tile, clipped to the tile's rounded corners. */
+.logo-filled {
+  overflow: hidden;
+}
+
+/* Specific enough to beat the logo sizes set inside the derby and the chart. */
+span.logo.logo-filled > img {
+  width: 100%;
+  height: 100%;
+}
+
+/* A white silhouette cut from the logo's shape. */
+.logo-cutout {
+  width: 22px;
+  height: 22px;
+  background: var(--text);
+  mask: center / contain no-repeat;
+  -webkit-mask: center / contain no-repeat;
+}

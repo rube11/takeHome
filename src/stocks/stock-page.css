@@ -1,0 +1,172 @@
+/* The stock page around the chart: the header, the company overview and the daily closes. */
+
+/* ---- Header: back link, logo, symbol and name (StockHeader in app/stocks/[symbol]/page.tsx) ---- */
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-height: 44px;
+  margin: -10px 0 4px -4px;
+  padding-right: 8px;
+  color: var(--text-2);
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  color: var(--text);
+}
+
+.back-link svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.stock-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stock-header .logo {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+}
+
+.stock-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.stock-name h1 {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.stock-name p {
+  overflow: hidden;
+  color: var(--text-2);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---- Sections below the chart ---- */
+
+.stock-section {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.stock-section h2 {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.stock-note {
+  margin-top: 8px;
+  color: var(--text-2);
+  font-size: 15px;
+}
+
+/* A label over a value, used by the company overview. */
+.fact-list dt {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.fact-list dd {
+  margin-top: 2px;
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Company overview (CompanyOverview in the same page file) ---- */
+
+.company-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(150px, 100%), 1fr));
+  gap: 16px 12px;
+  margin-top: 16px;
+}
+
+.company-facts dd {
+  overflow-wrap: anywhere;
+}
+
+.company-facts .description {
+  grid-column: 1 / -1;
+}
+
+.company-facts .description dd {
+  max-width: 68ch;
+  font-weight: 400;
+  line-height: 1.55;
+}
+
+/* ---- Daily closes (PriceHistory.tsx) ---- */
+
+.history {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.history th,
+.history td {
+  padding: 11px 0 11px 12px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.history th:first-child {
+  padding-left: 0;
+  text-align: left;
+}
+
+.history thead th {
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.history tbody tr {
+  border-top: 1px solid var(--line);
+}
+
+.history tbody th {
+  font-weight: 500;
+}
+
+.history-more {
+  min-height: 44px;
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 15px;
+}
+
+@media (min-width: 720px) {
+  .back-link {
+    margin-top: -24px;
+  }
+
+  .stock-section {
+    margin-top: 40px;
+  }
+}
