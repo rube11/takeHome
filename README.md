@@ -70,6 +70,7 @@ scripts/
   refresh.ts                    The `bun refresh` command
 data/
   market.json                   The saved watchlist: 15 stocks and their last 21 closes
-  .cache/                       Saved API responses and refreshed prices (not committed)
+  .cache/stocks/                Saved API responses for each stock (committed, so a deploy
+                                works without calling the API)
 public/logos/                   Company logos; mono/ has white cut-outs for dark logos
 ```
