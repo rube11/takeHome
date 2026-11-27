@@ -1,0 +1,35 @@
+# Each weekday evening, fetch the day's closes and commit them. The push redeploys the site.
+name: Refresh market data
+
+on:
+  schedule:
+    - cron: "30 23 * * 1-5" # 6:30 p.m. New York in winter, 7:30 p.m. in summer
+  workflow_dispatch: # also allows a run from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      # The refresh script needs no packages, so nothing is installed.
+      - run: npm run refresh
+        env:
+          ALPHA_VANTAGE_KEY: ${{ secrets.ALPHA_VANTAGE_KEY }}
+      - name: Commit the new data
+        run: |
+          # The refreshed watchlist is saved in the git-ignored cache (only when something was
+          # fetched), but the site reads data/market.json.
+          if [ -f data/.cache/market.json ]; then cp data/.cache/market.json data/market.json; fi
+          git add data
+          git diff --cached --quiet && exit 0
+          # Committed as the repo owner, since Vercel's free plan only deploys the owner's commits.
+          git -c user.name='${{ github.repository_owner }}' \
+            -c user.email='${{ github.repository_owner }}@users.noreply.github.com' \
+            commit -m 'Refresh market data'
+          git push
